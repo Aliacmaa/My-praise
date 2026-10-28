@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>سبحة – أستغفر الله</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri&family=Inter:wght@500&family=Playfair+Display:wght@700&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#15161b;--fg:#f1f1f3;--ar:#dedee1;--mute:#9b9ba2;--dim:#505158;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15161b}}
+:root[data-theme="dark"]{--bg:#15161b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;background:var(--bg);overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+body{display:flex;justify-content:center}
+#stage{position:relative;width:100%;max-width:560px;height:100%;overflow:hidden;touch-action:none;cursor:pointer;background:var(--bg);outline:none}
+canvas{position:absolute;inset:0;width:100%;height:100%}
+#scene{position:absolute;left:0;top:0;width:720px;transform-origin:0 0;pointer-events:none;color:var(--fg)}
+#scene>*{position:absolute;white-space:nowrap}
+.c{left:0;width:720px;text-align:center;line-height:1;transform:translateY(-50%)}
+#ar{top:calc(var(--T) + 28px);font:400 46px/1 Amiri,"Noto Naskh Arabic",serif;color:var(--ar)}
+#en{top:calc(var(--T) + 76px);font:700 26px/1 "Playfair Display",Georgia,serif}
+#tm{top:calc(var(--T) + 106px);font:700 21px/1 "Playfair Display",Georgia,serif}
+#hd{top:calc(var(--T) + 130px);font:500 10px/1 Inter,system-ui,sans-serif;letter-spacing:.38em;color:var(--mute)}
+#cnt{left:0;width:108px;text-align:right;top:calc(var(--T) + 93px);transform:translateY(-50%);font:500 40px/1 Inter,system-ui,sans-serif}
+#cnt i{font-style:normal;font-size:22px;color:var(--mute);margin-left:1px}
+#cnt.pl{animation:pl .9s ease-out}
+@keyframes pl{0%,60%{color:#fff;text-shadow:0 0 18px #fff8}100%{color:inherit;text-shadow:none}}
+#rd{left:0;width:108px;top:calc(var(--T) + 131px);transform:translateY(-50%);text-align:right;font:400 17px/1.6 system-ui,sans-serif;color:#c2c2c8;pointer-events:auto;touch-action:none;padding:6px 0}
+#p1{left:485px;top:calc(var(--T) + 103px);transform:translate(-50%,-50%);font:500 22px/1 Inter,system-ui,sans-serif;color:var(--mute);opacity:0}
+#p1.go{animation:p .75s ease-out}
+@keyframes p{0%{opacity:0;transform:translate(-50%,-30%)}14%{opacity:1}60%{opacity:.7}100%{opacity:0;transform:translate(-50%,-80%)}}
+#hint{left:486px;top:calc(var(--T) + 323px);transform:translate(-50%,-50%);font:400 16px/1 system-ui,sans-serif;color:var(--dim);transition:opacity .5s}
+#mt{position:absolute;top:12px;right:12px;width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:#fff;opacity:.3;cursor:pointer;display:grid;place-items:center}
+#mt:hover,#mt:focus-visible{opacity:.8}
+#mt:focus-visible,#stage:focus-visible{outline:2px solid #aab}
+#mt svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#mt .x{display:none}
+#mt.off .x{display:block}
+#mt.off .w{display:none}
+@media (prefers-reduced-motion:reduce){#p1.go{animation-duration:.01s}}
+/* ---------- الزر الدائري: الأماكن والزيارات ---------- */
+#ui{position:fixed;inset:0;display:flex;justify-content:center;pointer-events:none;z-index:5}
+#uiIn{position:relative;width:100%;max-width:560px;height:100%;pointer-events:none}
+#zbtn{position:absolute;pointer-events:auto;left:16px;bottom:calc(18px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:50%;border:1px solid rgba(255,255,255,.13);background:radial-gradient(120% 120% at 32% 20%,#2c2e38,#17181e 72%);color:#cfd3dc;display:grid;place-items:center;cursor:pointer;z-index:6;box-shadow:0 12px 26px rgba(0,0,0,.5),0 0 0 6px rgba(255,255,255,.025),inset 0 1px 0 rgba(255,255,255,.10);transition:transform .16s ease,color .2s,border-color .2s;-webkit-appearance:none;appearance:none;padding:0}
+#zbtn:active{transform:scale(.93)}
+#zbtn:hover{border-color:rgba(255,255,255,.24);color:#eef0f4}
+#zbtn:focus-visible{outline:2px solid #aab;outline-offset:3px}
+#zbtn svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#panel{position:absolute;pointer-events:auto;left:0;right:0;bottom:0;display:flex;flex-direction:column;height:auto;max-height:88%;background:linear-gradient(180deg,#20222b,#15161c 55%);border-radius:26px 26px 0 0;border-top:1px solid rgba(255,255,255,.10);box-shadow:0 -24px 60px rgba(0,0,0,.62);transform:translateY(101%);transition:transform .42s cubic-bezier(.22,.85,.2,1),visibility 0s linear .42s;z-index:8;overflow:hidden;touch-action:pan-y;visibility:hidden}
+#panel.on{transform:none;visibility:visible;transition:transform .42s cubic-bezier(.22,.85,.2,1),visibility 0s linear 0s}
+#panel .grab{position:absolute;top:9px;left:50%;margin-left:-21px;width:42px;height:4px;border-radius:2px;background:rgba(255,255,255,.18);z-index:3}
+#panel.reading{height:88%;height:88dvh}
+#listView{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+#readView{position:absolute;inset:0;display:flex;flex-direction:column}
+#readView{background:linear-gradient(180deg,#20222b,#15161b 50%);transform:translateX(102%);transition:transform .36s cubic-bezier(.22,.85,.2,1),visibility 0s linear .36s;box-shadow:-24px 0 50px rgba(0,0,0,.5);visibility:hidden}
+#readView.on{transform:none;visibility:visible;transition:transform .36s cubic-bezier(.22,.85,.2,1),visibility 0s linear 0s}
+.phead{flex:0 0 auto;padding:26px 20px 10px;display:flex;align-items:flex-start;gap:12px}
+.phead .ttl{flex:1 1 auto;min-width:0}
+.phead .tag{display:block;font:500 10px/1 Inter,system-ui,sans-serif;letter-spacing:.34em;color:#7d818e;margin-bottom:10px}
+.phead h2{margin:0;font:400 25px/1.35 Amiri,"Noto Naskh Arabic",serif;color:#f2f2f5;font-weight:400}
+#listSub{font:400 12.5px/1.5 system-ui,sans-serif;color:#878b97;margin-top:6px}
+.xbtn{flex:0 0 auto;width:38px;height:38px;border:1px solid rgba(255,255,255,.10);border-radius:50%;background:rgba(255,255,255,.045);color:#c9ccd4;display:grid;place-items:center;cursor:pointer;padding:0;-webkit-appearance:none;appearance:none;transition:background .2s,transform .16s}
+.xbtn:hover{background:rgba(255,255,255,.09)}
+.xbtn:active{transform:scale(.94)}
+.xbtn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#list{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:4px 14px calc(22px + env(safe-area-inset-bottom,0px))}
+.row{display:flex;align-items:center;gap:14px;width:100%;padding:13px 14px;margin-bottom:10px;border:1px solid rgba(255,255,255,.07);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));color:inherit;cursor:pointer;text-align:right;font-family:inherit;-webkit-appearance:none;appearance:none;transition:background .2s,transform .14s}
+.row:hover{background:rgba(255,255,255,.075)}
+.row:active{transform:scale(.985)}
+.row .ico{flex:0 0 auto;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(120% 120% at 32% 20%,#3a3d4a,#23252d);border:1px solid rgba(255,255,255,.09);color:#d6d9e1}
+.row .ico svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.row .tx{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:5px}
+.row .tx b{font:400 20px/1.3 Amiri,"Noto Naskh Arabic",serif;color:#f4f4f7}
+.row .tx span{font-size:12.5px;line-height:1.3;color:#8b8f9b}
+.row .ar{flex:0 0 auto;color:#5d616d}
+.row .ar svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#rtxt{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:2px 22px calc(48px + env(safe-area-inset-bottom,0px));-webkit-user-select:text;user-select:text}
+#rtxt p{margin:0 0 18px;font:400 25px/2.1 Amiri,"Noto Naskh Arabic",serif;color:#e2e3e8;text-align:justify}
+#rtxt p.first{color:#f6f6f9}
+#rtxt p.sp{margin-bottom:0}
+#rtxt .sep{height:2px;margin:28px 6% 30px;border-radius:2px;background:linear-gradient(90deg,rgba(104,156,255,0),rgba(104,156,255,.5) 18%,rgba(104,156,255,.5) 82%,rgba(104,156,255,0))}
+#rtxt .note{margin:26px 0 16px;font:500 14px/1.6 system-ui,sans-serif;letter-spacing:0;color:#b3b7c2;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:8px 14px;display:inline-block}
+#rtxt .lead{display:block;width:-moz-fit-content;width:fit-content;max-width:100%;box-sizing:border-box;margin:2px auto 20px;padding:10px 18px;border-radius:14px;border:1px solid rgba(104,156,255,.38);background:linear-gradient(180deg,rgba(62,120,255,.20),rgba(62,120,255,.08));color:#e3ebff;font:400 14.5px/1.7 system-ui,sans-serif;letter-spacing:0}
+#rtxt .lead.after{margin:8px auto 4px}
+#readView .tag{color:#8db2ff}
+#readView .rhead{position:relative;display:block;width:-moz-fit-content;width:fit-content;max-width:100%;margin:0;padding:5px 16px 7px;text-align:center}
+#readView .rhead .ink{position:absolute;inset:-3px -6px -1px;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%20400%20100%27%20preserveAspectRatio%3D%27none%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%27.9%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%234a86ec%27%2F%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%232f6bd6%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%231f4cae%27%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Cpath%20fill%3D%27url%28%23g%29%27%20d%3D%27M3%2047C22%2031%2054%2021%20106%2016%20168%2010%20262%209%20326%2014%20366%2017%20388%2025%20394%2034%20399%2045%20385%2057%20355%2065%20292%2081%20186%2086%20124%2078%2084%2073%2044%2063%2018%2053%207%2049%202%2050%203%2047Z%27%2F%3E%3Cpath%20fill%3D%27%236f9ff2%27%20opacity%3D%27.35%27%20d%3D%27M28%2042C58%2033%20110%2027%20168%2025%20226%2023%20282%2026%20322%2031%20332%2032%20328%2037%20314%2039%20258%2046%20168%2047%20108%2043%2072%2040%2044%2038%2034%2040Z%27%2F%3E%3C%2Fsvg%3E");background-repeat:no-repeat;background-size:100% 100%}
+#rtitle{position:relative;font-size:19px;line-height:1.45;color:#fff}
+@media (max-width:380px){.phead h2{font-size:22px}.row .tx b{font-size:18.5px}#zbtn{width:54px;height:54px}}
+@media (prefers-reduced-motion:reduce){#panel{transition:none}#readView{transition:none}}
+
+</style>
+</head>
+<body>
+<div id="stage" tabindex="0" role="button" aria-label="سبحة، اضغط أو اسحب للعد">
+  <canvas id="cv"></canvas>
+  <div id="scene">
+    <div class="c" id="ar" lang="ar" dir="rtl">أستغفرُ الله</div>
+    <div class="c" id="en">Astaghfiru allah</div>
+    <div class="c" id="tm">times 99/<span lang="ar" dir="rtl">مرة٩٩</span></div>
+    <div class="c" id="hd">@ m2oe.e</div>
+    <div id="cnt" aria-live="polite"><b id="n">0</b><i>/99</i></div>
+    <div id="rd" lang="ar" dir="rtl" title="اضغط مطولاً لإعادة التصفير"></div>
+    <div id="p1">+1</div>
+    <div id="hint" lang="ar" dir="rtl">إضغط أو اسحب للعد</div>
+  </div>
+  <button id="mt" aria-label="كتم الصوت" title="الصوت"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="w" d="M16 9a4 4 0 010 6M18.5 6.5a8 8 0 010 11"/><path class="x" d="M17 9l5 6M22 9l-5 6"/></svg></button>
+</div>
+
+<div id="ui"><div id="uiIn">
+  <button id="zbtn" type="button" aria-label="الأماكن والزيارات" aria-haspopup="dialog" aria-expanded="false" title="الأماكن">
+    <svg viewBox="0 0 24 24"><path d="M4 20V11.4C4 8.2 7.6 5.8 12 5.8s8 2.4 8 5.6V20"/><path d="M2.6 20h18.8"/><path d="M10.2 20v-4.7a1.8 1.8 0 013.6 0V20"/><path d="M12 5.6V3.4"/></svg>
+  </button>
+  <div id="veil"></div>
+  <section id="panel" dir="rtl" role="dialog" aria-modal="true" aria-label="الأماكن" aria-hidden="true">
+    <div class="grab"></div>
+    <div id="listView">
+      <div class="phead">
+        <button class="xbtn" id="lback" type="button" aria-label="رجوع" style="display:none"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <div class="ttl"><span class="tag" id="ltag">PLACES</span><h2 id="ltitle">الأماكن</h2><div id="listSub">زيارات وأدعية</div></div>
+        <button class="xbtn" id="lclose" type="button" aria-label="إغلاق"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div id="list"></div>
+    </div>
+    <div id="readView" aria-hidden="true">
+      <div class="phead">
+        <button class="xbtn" id="back" type="button" aria-label="رجوع"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+        <div class="ttl"><span class="tag" id="rtag">ZIYARA</span><h2 class="rhead"><span class="ink" aria-hidden="true"></span><span id="rtitle"></span></h2></div>
+        <button class="xbtn" id="rclose" type="button" aria-label="إغلاق"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div id="rtxt" lang="ar" dir="rtl"></div>
+    </div>
+  </section>
+</div></div>
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var TARGET=99,stage=$('#stage'),cv=$('#cv'),ctx=cv.getContext('2d'),scene=$('#scene');
+var st={c:0,r:1,mute:false,seen:false};
+try{Object.assign(st,JSON.parse(localStorage.getItem('tasbih')||'{}'))}catch(e){}
+function save(){try{localStorage.setItem('tasbih',JSON.stringify(st))}catch(e){}}
+function vibe(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+var RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---------- bead path (measured from the video: parabola through the bead centres) ---------- */
+var A=0.001204,B=-1.6237,C=1117.2,tab=[],L=0;
+for(var x=-200;x<=1000;x+=2){var y=A*x*x+B*x+C;if(tab.length){var q0=tab[tab.length-1];L+=Math.hypot(x-q0.x,y-q0.y)}tab.push({x:x,y:y,s:L})}
+function P(s){var lo=0,hi=tab.length-1;while(hi-lo>1){var m=(lo+hi)>>1;if(tab[m].s<s)lo=m;else hi=m}var a=tab[lo],b=tab[hi],f=(s-a.s)/((b.s-a.s)||1);return{x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f}}
+var S0=tab[380].s,SP=65.5,R=32.6;           /* first fixed bead at x=560, spacing 65.5, radius 32.6 */
+var k=1,dpr=1,T=100,Hd=1500,sh=0,bump=0,bv=0,anim=null,queue=0,done=false;
+var ease=function(u){return u<.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2};
+
+function bead(p){
+  var x=p.x,y=p.y;if(x<-60||x>800)return;
+  ctx.save();ctx.shadowColor='rgba(0,0,0,.5)';ctx.shadowBlur=14*dpr*k;ctx.shadowOffsetY=6*dpr*k;
+  var g=ctx.createRadialGradient(x-11,y-13,3,x,y,R);
+  g.addColorStop(0,'#fbfcff');g.addColorStop(.3,'#e6eaf3');g.addColorStop(.65,'#cbd0dd');g.addColorStop(.92,'#a7acbc');g.addColorStop(1,'#9498aa');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,R,0,7);ctx.fill();ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,.72)';ctx.beginPath();ctx.ellipse(x-R*.38,y-R*.42,R*.2,R*.13,-.7,0,7);ctx.fill();
+}
+function draw(){
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.setTransform(dpr*k,0,0,dpr*k,0,(T-452)*dpr*k);
+  ctx.beginPath();for(var i=0;i<tab.length;i++){if(i)ctx.lineTo(tab[i].x,tab[i].y);else ctx.moveTo(tab[i].x,tab[i].y)}
+  ctx.strokeStyle='#8c8f99';ctx.lineWidth=2.4;ctx.stroke();
+  var lead=S0-(2-ease(sh))*SP;
+  for(var s=lead;s>0;s-=SP)bead(P(s));                         /* moving chain */
+  for(var j=0;j<4;j++)bead(P(S0+j*SP+bump*Math.pow(.5,j)));   /* fixed group at the end */
+}
+function size(){
+  var W=stage.clientWidth,H=stage.clientHeight;
+  dpr=Math.min(window.devicePixelRatio||1,3);k=W/720;Hd=H/k;T=Math.max(60,Math.min(Hd*.2,360));
+  scene.style.transform='scale('+k+')';scene.style.height=Hd+'px';scene.style.setProperty('--T',T+'px');
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);draw();
+}
+
+/* ---------- counting ---------- */
+function render(){$('#n').textContent=st.c;$('#rd').textContent='الجولات: '+st.r;$('#hint').style.opacity=st.seen?0:1}
+function plus(){var e=$('#p1');e.classList.remove('go');void e.offsetWidth;e.classList.add('go')}
+function count(){
+  if(done)return;
+  st.c++;st.seen=true;render();click(1);plus();vibe(8);save();
+  if(st.c>=TARGET)complete();
+}
+function complete(){
+  done=true;var c=$('#cnt');c.classList.remove('pl');void c.offsetWidth;c.classList.add('pl');
+  chime();vibe([30,50,90]);
+  setTimeout(function(){st.c=0;st.r++;render();save();done=false},1100);
+}
+function dur(){return RM?90:queue>1?130:queue?170:215}
+function land(now){
+  sh=0;bv=4;count();
+  if(queue>0){queue--;anim={t0:now,d:dur()}}else anim=null;
+}
+function loop(now){
+  if(anim){var u=Math.min(1,(now-anim.t0)/anim.d);sh=u;if(u>=1)land(now)}
+  if(bump||bv){bv+=-bump*.35-bv*.18;bump+=bv;if(Math.abs(bump)<.05&&Math.abs(bv)<.05){bump=0;bv=0}}
+  draw();
+  if(anim||bump||bv)requestAnimationFrame(loop);
+}
+function tap(){
+  unlock();
+  if(done)return;
+  if(anim){if(queue<4)queue++;return}
+  anim={t0:performance.now(),d:dur()};requestAnimationFrame(loop);
+}
+
+/* ---------- audio: bead click + ambient pad (G minor loop measured from the video) ---------- */
+var AC,master,mus,sfx,rev,noise,nextT=0,ci=0;
+var CH=[{r:49,n:[196,233.1,293.7,98]},{r:43.65,n:[174.6,220,293.7,130.8]},{r:38.9,n:[155.6,196,233.1,293.7]},{r:32.7,n:[155.6,196,261.6,293.7]}];
+function initAudio(){
+  var Ctor=window.AudioContext||window.webkitAudioContext;if(!Ctor||AC)return;
+  AC=new Ctor();master=AC.createGain();master.gain.value=st.mute?0:1;
+  var cp=AC.createDynamicsCompressor();master.connect(cp);cp.connect(AC.destination);
+  mus=AC.createGain();mus.gain.value=.55;mus.connect(master);
+  sfx=AC.createGain();sfx.gain.value=.9;sfx.connect(master);loadClick();
+  var n=AC.sampleRate*2.4,ir=AC.createBuffer(2,n,AC.sampleRate);
+  for(var c=0;c<2;c++){var d=ir.getChannelData(c);for(var i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3)}
+  rev=AC.createConvolver();rev.buffer=ir;var rg=AC.createGain();rg.gain.value=.45;rev.connect(rg);rg.connect(mus);
+  noise=AC.createBuffer(1,AC.sampleRate*.05,AC.sampleRate);var nd=noise.getChannelData(0);for(var j=0;j<nd.length;j++)nd[j]=Math.random()*2-1;
+  nextT=AC.currentTime+.1;sched();setInterval(sched,400);
+}
+function unlock(){initAudio();if(AC&&AC.state==='suspended')AC.resume()}
+function sched(){if(!AC)return;while(nextT<AC.currentTime+1.5){chord(CH[ci%4],nextT);nextT+=3.5;ci++}}
+function chord(c,t){
+  var D=4.6;
+  function mk(f,type,vol,lp){
+    var o=AC.createOscillator(),g=AC.createGain(),fl=AC.createBiquadFilter();
+    o.type=type;o.frequency.value=f;o.detune.value=(Math.random()-.5)*14;fl.type='lowpass';fl.frequency.value=lp;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+1.3);g.gain.setValueAtTime(vol,t+3);g.gain.linearRampToValueAtTime(0,t+D+.6);
+    o.connect(fl);fl.connect(g);g.connect(mus);g.connect(rev);o.start(t);o.stop(t+D+.7);
+  }
+  mk(c.r,'sine',.45,200);mk(c.r*2,'triangle',.12,400);
+  c.n.forEach(function(f){mk(f,'sawtooth',.035,900);mk(f*1.003,'sawtooth',.03,900)});
+}
+var CLICK_B64="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",clickBuf=null;
+/* the real bead click, isolated from the video (average of 9 identical clicks, music filtered out) */
+function loadClick(){try{var s=atob(CLICK_B64),u=new Uint8Array(s.length);for(var i=0;i<s.length;i++)u[i]=s.charCodeAt(i);var p=AC.decodeAudioData(u.buffer,function(b){clickBuf=b},function(){});if(p&&p.catch)p.catch(function(){})}catch(e){}}
+function click(v){
+  if(!AC)return;
+  if(!clickBuf){clickSynth(v);return}
+  var o=AC.createBufferSource(),g=AC.createGain();o.buffer=clickBuf;g.gain.value=.9*v;o.connect(g);g.connect(sfx);o.start();
+}
+function clickSynth(v){
+  if(!AC)return;var t=AC.currentTime;
+  var n=AC.createBufferSource();n.buffer=noise;var bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=3000;bp.Q.value=1.1;
+  var g=AC.createGain();g.gain.setValueAtTime(.9*v,t);g.gain.exponentialRampToValueAtTime(.001,t+.03);
+  n.connect(bp);bp.connect(g);g.connect(sfx);n.start(t);n.stop(t+.04);
+  var o=AC.createOscillator(),g2=AC.createGain();o.frequency.setValueAtTime(2900,t);o.frequency.exponentialRampToValueAtTime(1500,t+.03);
+  g2.gain.setValueAtTime(.35*v,t);g2.gain.exponentialRampToValueAtTime(.001,t+.025);o.connect(g2);g2.connect(sfx);o.start(t);o.stop(t+.04);
+  var o3=AC.createOscillator(),g3=AC.createGain();o3.frequency.setValueAtTime(210,t);o3.frequency.exponentialRampToValueAtTime(90,t+.05);
+  g3.gain.setValueAtTime(.35*v,t);g3.gain.exponentialRampToValueAtTime(.001,t+.06);o3.connect(g3);g3.connect(sfx);o3.start(t);o3.stop(t+.07);
+}
+function bell(f,t){
+  [[1,.28,2.2],[2.76,.08,.7],[4.1,.03,.35]].forEach(function(p){
+    var o=AC.createOscillator(),g=AC.createGain();o.frequency.value=f*p[0];
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(p[1],t+.01);g.gain.exponentialRampToValueAtTime(.0005,t+p[2]);
+    o.connect(g);g.connect(sfx);g.connect(rev);o.start(t);o.stop(t+p[2]+.05);
+  });
+}
+function chime(){
+  if(!AC)return;var t=AC.currentTime;
+  [784,932,1175,1568].forEach(function(f,i){bell(f,t+.35+i*.17)});
+  for(var i=0;i<9;i++)(function(i){setTimeout(function(){click(Math.max(.2,.7-i*.05))},i*55)})(i);
+}
+
+/* ---------- input ---------- */
+var pd=null;
+stage.addEventListener('pointerdown',function(e){
+  if(uiOpen||e.target.closest('#mt,#zbtn,#panel,#veil'))return;
+  pd={ax:e.clientX,ay:e.clientY,moved:false};try{stage.setPointerCapture(e.pointerId)}catch(_){}
+});
+stage.addEventListener('pointermove',function(e){
+  if(!pd)return;
+  if(Math.hypot(e.clientX-pd.ax,e.clientY-pd.ay)>46){tap();pd.ax=e.clientX;pd.ay=e.clientY;pd.moved=true}
+});
+function up(){if(pd&&!pd.moved)tap();pd=null}
+stage.addEventListener('pointerup',up);
+stage.addEventListener('pointercancel',function(){pd=null});
+stage.addEventListener('keydown',function(e){if(uiOpen)return;if(e.key===' '||e.key==='Enter'||e.key==='ArrowUp'){e.preventDefault();tap()}});
+
+var lp,rd=$('#rd');
+rd.addEventListener('pointerdown',function(e){e.stopPropagation();lp=setTimeout(function(){st.c=0;st.r=1;st.seen=false;render();save();vibe([20,30,20])},800)});
+['pointerup','pointerleave','pointercancel'].forEach(function(n){rd.addEventListener(n,function(){clearTimeout(lp)})});
+
+var mt=$('#mt');
+function mtUI(){mt.classList.toggle('off',st.mute)}
+mt.addEventListener('pointerdown',function(e){e.stopPropagation()});
+mt.addEventListener('click',function(e){
+  e.stopPropagation();st.mute=!st.mute;mtUI();save();unlock();
+  if(master)master.gain.setTargetAtTime(st.mute?0:1,AC.currentTime,.05);
+});
+
+/* ================= الأماكن =================
+   لإضافة مكان جديد: أضف عنصراً إلى PLACES
+     { title:'الاسم', sub:'وصف قصير', type:'ziyara' أو 'dua',
+       lead:'ملاحظة زرقاء فوق الدعاء' (اختياري)، after:'ملاحظة زرقاء تحت الدعاء' (اختياري)،
+        body:[ 'فقرة', 'فقرة', {note:'تُقال مائة مرة'} ] }
+   ولإضافة مجموعة بداخلها خيارات (مثل "دعاء طلب الحاجة"):
+     { title:'اسم المجموعة', sub:'وصف', type:'dua', items:[ {...}, {...} ] }
+   ========================================== */
+var PLACES=[{
+  title:'زيارة عاشوراء',
+  sub:'الإمام الحسين عليه السلام',
+  type:'ziyara',
+  body:[
+      'السلام عليك يا أبا عبد الله، السلام عليك يا ابن رسول الله، السلام عليك يا ابن أمير المؤمنين وابن سيد الوصيين، السلام عليك يا ابن فاطمة سيدة نساء العالمين، السلام عليك يا ثار الله وابن ثاره والوتر الموتور، السلام عليك وعلى الأرواح التي حلت بفنائك، عليكم مني جميعاً سلام الله أبداً ما بقيت وبقي الليل والنهار.',
+      'يا أبا عبد الله، لقد عظمت الرزية وجلت، وعظمت المصيبة بك علينا وعلى جميع أهل الإسلام، وجلت وعظمت مصيبتك في السماوات على جميع أهل السماوات، فلعن الله أمة أسست أساس الظلم والجور عليكم أهل البيت، ولعن الله أمة دفعتكم عن مقامكم وأزالتكم عن مراتبكم التي رتبكم الله فيها، ولعن الله أمة قتلتكم، ولعن الله الممهدين لهم بالتمكين من قتالكم، برئت إلى الله وإليكم منهم ومن أشياعهم وأتباعهم وأوليائهم.',
+      'يا أبا عبد الله، إني سلم لمن سالمكم وحرب لمن حاربكم إلى يوم القيامة، ولعن الله آل زياد وآل مروان، ولعن الله بني أمية قاطبة، ولعن الله ابن مرجانة، ولعن الله عمر بن سعد، ولعن الله شمراً، ولعن الله أمة أسرجت وألجمت وتنقبت لقتالك، بأبي أنت وأمي لقد عظم مصابي بك، فأسأل الله الذي أكرم مقامك وأكرمني أن يرزقني طلب ثارك مع إمام منصور من أهل بيت محمد صلى الله عليه وآله.',
+      'اللهم اجعلني عندك وجيهاً بالحسين عليه السلام في الدنيا والآخرة.',
+      'يا أبا عبد الله، إني أتقرب إلى الله وإلى رسوله وإلى أمير المؤمنين وإلى فاطمة وإلى الحسن وإليك بموالاتك، وبالبراءة ممن قاتلك ونصب لك الحرب، وبالبراءة ممن أسس أساس الظلم والجور عليكم، وأبرأ إلى الله وإلى رسوله ممن أسس أساس ذلك وبنى عليه بنيانه وجرى في ظلمه وجوره عليكم وعلى أشياعكم، برئت إلى الله وإليكم منهم، وأتقرب إلى الله ثم إليكم بموالاتكم وموالاة وليكم، وبالبراءة من أعدائكم والناصبين لكم الحرب، وبالبراءة من أشياعهم وأتباعهم.',
+      'إني سلم لمن سالمكم وحرب لمن حاربكم، وولي لمن والاكم وعدو لمن عاداكم، فأسأل الله الذي أكرمني بمعرفتكم ومعرفة أوليائكم ورزقني البراءة من أعدائكم أن يجعلني معكم في الدنيا والآخرة، وأن يثبت لي عندكم قدم صدق في الدنيا والآخرة، وأسأله أن يبلغني المقام المحمود لكم عند الله، وأن يرزقني طلب ثاري مع إمام هدى ظاهر ناطق بالحق منكم.',
+      'وأسأل الله بحقكم وبالشأن الذي لكم عنده أن يعطيني بمصابي بكم أفضل ما يعطي مصاباً بمصيبته، مصيبة ما أعظمها وأعظم رزيتها في الإسلام وفي جميع السماوات والأرض.',
+      'اللهم اجعلني في مقامي هذا ممن تناله منك صلوات ورحمة ومغفرة، اللهم اجعل محياي محيا محمد وآل محمد، ومماتي ممات محمد وآل محمد.',
+      'اللهم إن هذا يوم تبركت به بنو أمية وابن آكلة الأكباد اللعين ابن اللعين على لسانك ولسان نبيك صلى الله عليه وآله في كل موطن وموقف وقف فيه نبيك صلى الله عليه وآله، اللهم العن أبا سفيان ومعاوية ويزيد ابن معاوية عليهم منك اللعنة أبد الآبدين، وهذا يوم فرحت به آل زياد وآل مروان بقتلهم الحسين صلوات الله عليه، اللهم فضاعف عليهم اللعن منك والعذاب الأليم.',
+      'اللهم إني أتقرب إليك في هذا اليوم وفي موقفي هذا وأيام حياتي بالبراءة منهم واللعنة عليهم، وبالموالاة لنبيك وآل نبيك عليه وعليهم السلام.',
+      {note:'ثم تقول مائة مرة'},
+      'اللهم العن أول ظالم ظلم حق محمد وآل محمد وآخر تابع له على ذلك، اللهم العن العصابة التي جاهدت الحسين عليه السلام وشايعت وبايعت وتابعت على قتله، اللهم العنهم جميعاً.',
+      {note:'ثم تقول مائة مرة'},
+      'السلام عليك يا أبا عبد الله وعلى الأرواح التي حلت بفنائك، عليك مني سلام الله أبداً ما بقيت وبقي الليل والنهار، ولا جعله الله آخر العهد مني لزيارتكم، السلام على الحسين وعلى علي بن الحسين وعلى أولاد الحسين وعلى أصحاب الحسين.',
+      {note:'ثم تقول'},
+      'اللهم خص أنت أول ظالم باللعن مني وابدأ به أولاً، ثم العن الثاني والثالث والرابع، اللهم العن يزيد خامساً، والعن عبيد الله بن زياد وابن مرجانة وعمر بن سعد وشمراً وآل أبي سفيان وآل زياد وآل مروان إلى يوم القيامة.',
+      {note:'ثم تسجد وتقول'},
+      'اللهم لك الحمد حمد الشاكرين لك على مصابهم، الحمد لله على عظيم رزيتي، اللهم ارزقني شفاعة الحسين يوم الورود، وثبت لي قدم صدق عندك مع الحسين وأصحاب الحسين الذين بذلوا مهجهم دون الحسين عليه السلام.'
+  ]
+},{
+  title:'دعاء طلب الحاجة',
+  sub:'أدعية قضاء الحوائج',
+  type:'dua',
+  items:[{
+    title:'دعاء الإمام جعفر الصادق لقضاء الحاجة',
+    sub:'الإمام الصادق عليه السلام',
+    type:'dua',
+    lead:'اقرأ هذا الدعاء بعد الصلاة (ثلاث مرات)',
+    body:[
+      'يا من يفعل ما يشاء، ولا يفعل ما يشاء أحد غيره.'
+    ],
+    after:'وبعد الدعاء اطلب الحاجة'
+  }]
+},{
+  title:'دعاء العهد',
+  sub:'أدعية العهد',
+  type:'dua',
+  items:[{
+    title:'دعاء الإمام الصادق (عليه السلام)',
+    sub:'دعاء العهد',
+    type:'dua',
+    lead:'دعاء العهد هو من الأدعية المهمة التي ينبغي للموالي المواظبة عليه بما لا يقل عن أربعين صباحا فقد روي عن الإمام الصادق (عليه السلام) أنه قال: من دعا إلى الله (تعالى) أربعين صباحا بهذا العهد كان من أنصار قائمنا وقد ذكره الشيخ عباس القمي في كتاب مفاتيح الجنان',
+    body:[
+      'اللّهُمَّ رَبَّ النُّورِ العَظِيمِ، وَرَبَّ الكُرسِيِّ الرَّفِيعِ، وَرَبَّ البَحرِ المَسجُورِ، وَمُنزِلَ التَّوراةِ وَالإِنجِيلِ وَالزَّبُورِ، وَرَبَّ الظِّلِّ وَالحَرُورِ، وَمُنزِلَ القُرآنِ العَظِيمِ، وَرَبَّ المَلائِكَةِ المُقَرَّبِينَ وَالأَنبِياءِ وَالمُرسَلِينَ.',
+      'اللّهُمَّ إِنِّي أَسأَلُكَ بِاسمِكَ الكَرِيمِ، وَبِنُورِ وَجهِكَ المُنِيرِ، وَمُلكِكَ القَدِيمِ، يا حَيُّ يا قَيُّومُ، أَسأَلُكَ بِاسمِكَ الَّذِي أَشرَقَت بِهِ السَّماواتُ وَالأَرَضُونَ، وَبِاسمِكَ الَّذِي يَصلُحُ بِهِ الأَوَّلُونَ وَالآخِرُونَ، يا حَيّاً قَبلَ كُلِّ حَيٍّ، وَيا حَيّاً بَعدَ كُلِّ حَيٍّ، وَيا حَيّاً حِينَ لا حَيَّ، يا مُحيِيَ المَوتى وَمُمِيتَ الأَحياءِ، يا حَيُّ لا إِلهَ إِلاّ أَنتَ.',
+      'اللّهُمَّ بَلِّغ مَولانا الإِمامَ الهادِيَ المَهدِيَّ القائِمَ بِأَمرِكَ، صَلَواتُ اللهِ عَلَيهِ وَعَلى آبائِهِ الطَّاهِرِينَ، عَن جَمِيعِ المُؤمِنِينَ وَالمُؤمِناتِ، فِي مَشارِقِ الأَرضِ وَمَغارِبِها، سَهلِها وَجَبَلِها، وَبَرِّها وَبَحرِها، وَعَنِّي وَعَن والِدَيَّ مِنَ الصَّلَواتِ زِنَةَ عَرشِ اللهِ، وَمِدادَ كَلِماتِهِ، وَما أَحصاهُ عِلمُهُ، وَأَحاطَ بِهِ كِتابُهُ.',
+      'اللّهُمَّ إِنِّي أُجَدِّدُ لَهُ فِي صَبِيحَةِ يَومِي هذا، وَما عِشتُ مِن أَيَّامِي، عَهداً وَعَقداً وَبَيعَةً لَهُ فِي عُنُقِي، لا أَحُولُ عَنها وَلا أَزُولُ أَبَداً.',
+      'اللّهُمَّ اجعَلنِي مِن أَنصارِهِ وَأَعوانِهِ، وَالذَّابِّينَ عَنهُ، وَالمُسارِعِينَ إِلَيهِ فِي قَضاءِ حَوائِجِهِ، وَالمُمتَثِلِينَ لِأَوامِرِهِ، وَالمُحامِينَ عَنهُ، وَالسَّابِقِينَ إِلى إِرادَتِهِ، وَالمُستَشهَدِينَ بَينَ يَدَيهِ.',
+      'اللّهُمَّ إِن حالَ بَينِي وَبَينَهُ المَوتُ الَّذِي جَعَلتَهُ عَلى عِبادِكَ حَتماً مَقضِيّاً، فَأَخرِجنِي مِن قَبرِي، مُؤتَزِراً كَفَنِي، شاهِراً سَيفِي، مُجَرِّداً قَناتِي، مُلَبِّياً دَعوَةَ الدَّاعِي فِي الحاضِرِ وَالبادِي.',
+      'اللّهُمَّ أَرِنِي الطَّلعَةَ الرَّشِيدَةَ، وَالغُرَّةَ الحَمِيدَةَ، وَاكحَل ناظِرِي بِنَظرَةٍ مِنِّي إِلَيهِ، وَعَجِّل فَرَجَهُ، وَسَهِّل مَخرَجَهُ، وَأَوسِع مَنهَجَهُ، وَاسلُك بِي مَحَجَّتَهُ، وَأَنفِذ أَمرَهُ، وَاشدُد أَزرَهُ، وَاعمُرِ اللّهُمَّ بِهِ بِلادَكَ، وَأَحيِ بِهِ عِبادَكَ، فَإِنَّكَ قُلتَ وَقَولُكَ الحَقُّ: ظَهَرَ الفَسادُ فِي البَرِّ وَالبَحرِ بِما كَسَبَت أَيدِي النَّاسِ، فَأَظهِرِ اللّهُمَّ لَنا وَلِيَّكَ، وَابنَ بِنتِ نَبِيِّكَ، المُسَمّى بِاسمِ رَسُولِكَ، حَتّى لا يَظفَرَ بِشَيءٍ مِنَ الباطِلِ إِلاّ مَزَّقَهُ، وَيُحِقَّ الحَقَّ وَيُحَقِّقَهُ.',
+      'اللّهُمَّ اجعَلهُ مَفزَعاً لِمَظلُومِ عِبادِكَ، وَناصِراً لِمَن لا يَجِدُ لَهُ ناصِراً غَيرَكَ، وَمُجَدِّداً لِما عُطِّلَ مِن أَحكامِ كِتابِكَ، وَمُشَيِّداً لِما وَرَدَ مِن أَعلامِ دِينِكَ وَسُنَنِ نَبِيِّكَ، صَلَّى اللهُ عَلَيهِ وَآلِهِ، وَاجعَلهُ اللّهُمَّ مِمَّن حَصَّنتَهُ مِن بَأسِ المُعتَدِينَ.',
+      'اللّهُمَّ وَسُرَّ نَبِيَّكَ مُحَمَّداً صَلَّى اللهُ عَلَيهِ وَآلِهِ بِرُؤيَتِهِ، وَمَن تَبِعَهُ عَلى دَعوَتِهِ، وَارحَم استِكانَتَنا بَعدَهُ.',
+      'اللّهُمَّ اكشِف هذِهِ الغُمَّةَ عَن هذِهِ الأُمَّةِ بِحُضُورِهِ، وَعَجِّل لَنا ظُهُورَهُ، إِنَّهُم يَرَونَهُ بَعِيداً وَنَراهُ قَرِيباً، بِرَحمَتِكَ يا أَرحَمَ الرَّاحِمِينَ.',
+      {note:'ثم تضرب على فخذك الأيمن بيدك ثلاث مرات وتقول كل مرة'},
+      'العَجَلَ العَجَلَ يا مَولايَ يا صاحِبَ الزَّمانِ.'
+    ]
+  }]
+},{
+  title:'أدعية الصباح',
+  sub:'تقرأها في صلاة الصباح',
+  type:'dua',
+  items:[{
+  title:'أدعية يومية بعد صلاة الفجر',
+  sub:'أدعية يومية',
+  type:'dua',
+  spaced:true,
+  body:[
+    '(اللهم يا مسخر الجبال الراسية والقلوب القاسية والعباد العاصية، سخر لي من حظوظ الدنيا ما لا عين رأت ولا أذن سمعت ولا خطر على قلب بشر، اللهم سخر لي من جنود الأرض وجنود السماء، وسخر لي قلوب خلقك وكل من تولى أمري، وسخر لي العباد الطيبين المساهمين في حياتي)',
+    '(اللهم إني أسألك القبول بين الخلق، وأن تسخر لي السماء ومن فيها والأرض ومن عليها، اللهم اجعلني مباركاً أينما كنت، وبارك لي في حياتي وذريتي وعملي ومالي وقدراتي وإنجازاتي وكل أوقاتي وصحتي وكل خير ونعمة رزقتني بها)',
+    '(اللهم اجعلني ممن تفاءل بخيرك فأكرمته، وتوكل عليك فكفيته، ولجأ إليك فأعطيته، واستغاث بك فأغثته، واستنصرك فنصرته، واستغفرك فغفرت له)',
+    '(اللهم اجعلني من أصحاب الوجوه المستبشرة الباسمة، وأصحاب النفوس الطيبة الطاهرة، والقلوب المطمئنة الخاشعة، وارزقني ربي حسن الختام وطيب المقام والتوكل عليك يا قادر يا جبار)',
+    '(اللهم إني أسألك من الخير كله عاجله وآجله، ما علمت منه وما لم أعلم)'
+  ]
+  },{
+  title:'دعاء الرزق',
+  sub:'طلب الرزق',
+  type:'dua',
+  body:[
+    'اللَّهُمَّ إِنْ كَانَ رِزْقِي فِي السَّمَاءِ فَأَنْزِلْهُ، وَإِنْ كَانَ فِي الْأَرْضِ فَأَخْرِجْهُ، وَإِنْ كَانَ بَعِيدًا فَقَرِّبْهُ، وَإِنْ كَانَ قَرِيبًا فَيَسِّرْهُ، وَإِنْ كَانَ قَلِيلًا فَكَثِّرْهُ، وَإِنْ كَانَ كَثِيرًا فَبَارِكْ لِي فِيهِ. رَبِّي أَعُوذُ بِكَ مِنْ شَتَاتِ الْأَمْرِ وَمَسِّ الضُّرِّ وَضِيقِ الصَّدْرِ. رَبِّي إِنْ كَانَ هُنَاكَ ذَنْبٌ يَحُولُ بَيْنِي وَبَيْنَ تَيْسِيرِ أُمُورِي فَاغْفِرْهُ لِي. اللَّهُمَّ وَأَسْعِدْنَا سَعَادَةً لَا تَشْقَى بَعْدَهَا أَبَدًا. رَبِّي أَسْتَوْدِعُكَ عُمْرِي، أَدْعِيَةٌ فَاضَ بِهَا قَلْبِي فَاسْتَجِبْهَا لِي يَا كَرِيمُ.'
+  ]
+  }]
+}];
+var ICON_SHRINE='<svg viewBox="0 0 24 24"><path d="M4 20V11.4C4 8.2 7.6 5.8 12 5.8s8 2.4 8 5.6V20"/><path d="M2.6 20h18.8"/><path d="M10.2 20v-4.7a1.8 1.8 0 013.6 0V20"/></svg>';
+var ICON_BOOK='<svg viewBox="0 0 24 24"><path d="M12 6.6C10.5 5.2 8.5 4.6 5.9 4.6H3.4v13.1h2.5c2.6 0 4.6.6 6.1 1.9 1.5-1.3 3.5-1.9 6.1-1.9h2.5V4.6h-2.5c-2.6 0-4.6.6-6.1 2z"/><path d="M12 6.6v13"/></svg>';
+var ICON_STACK='<svg viewBox="0 0 24 24"><path d="M12 3.6 3.6 8 12 12.4 20.4 8 12 3.6z"/><path d="M4.4 12.1 12 16.2l7.6-4.1"/><path d="M4.4 16.1 12 20.2l7.6-4.1"/></svg>';
+var ARROW='<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>';
+var zbtn=$('#zbtn'),veil=$('#veil'),panel=$('#panel'),listEl=$('#list'),
+    readV=$('#readView'),rtitle=$('#rtitle'),rtag=$('#rtag'),rtxt=$('#rtxt'),
+    ltitle=$('#ltitle'),lsub=$('#listSub'),ltag=$('#ltag'),lback=$('#lback'),
+    uiOpen=false,readOpen=false,stack=[];
+
+function row(n){
+  var b=document.createElement('button');b.type='button';b.className='row';
+  var ic=n.items?ICON_STACK:(n.type==='dua'?ICON_BOOK:ICON_SHRINE);
+  b.innerHTML='<span class="ico">'+ic+'</span><span class="tx"><b></b><span></span></span><span class="ar">'+ARROW+'</span>';
+  b.querySelector('b').textContent=n.title||'';
+  b.querySelector('.tx span').textContent=n.sub||'';
+  b.addEventListener('pointerdown',function(e){e.stopPropagation()});
+  b.addEventListener('click',function(e){
+    e.stopPropagation();
+    if(n.items){stack.push(n);renderList();listEl.scrollTop=0}
+    else openRead(n);
+  });
+  return b;
+}
+function renderList(){
+  var parent=stack.length?stack[stack.length-1]:null;
+  var items=parent?(parent.items||[]):PLACES;
+  ltag.textContent=parent?'DUA':'PLACES';
+  ltitle.textContent=parent?(parent.title||'الأماكن'):'الأماكن';
+  lsub.textContent=parent?(parent.sub||''):'زيارات وأدعية';
+  lback.style.display=parent?'grid':'none';
+  listEl.innerHTML='';
+  items.forEach(function(n){listEl.appendChild(row(n))});
+}
+function openRead(n){
+  unlock();click(.45);vibe(6);
+  rtag.textContent=n.type==='dua'?'DUA':'ZIYARA';
+  rtitle.textContent=n.title||'';
+  rtxt.innerHTML='';
+  if(n.lead){var L=document.createElement('div');L.className='lead';L.textContent=n.lead;rtxt.appendChild(L)}
+  (n.body||[]).forEach(function(b,i){
+    if(typeof b==='string'){
+      var d=document.createElement('p');d.textContent=b;
+      if(!i)d.className='first';
+       if(n.spaced){d.classList.add('sp');if(i){var sp=document.createElement('div');sp.className='sep';rtxt.appendChild(sp)}}
+      rtxt.appendChild(d);
+    }else if(b&&b.note){
+      var x=document.createElement('div');x.className='note';x.textContent=b.note;rtxt.appendChild(x);
+    }
+  });
+  if(n.after){var A2=document.createElement('div');A2.className='lead after';A2.textContent=n.after;rtxt.appendChild(A2)}
+  rtxt.scrollTop=0;
+  readOpen=true;panel.classList.add('reading');readV.classList.add('on');readV.setAttribute('aria-hidden','false');
+}
+function closeRead(){
+  readOpen=false;panel.classList.remove('reading');readV.classList.remove('on');readV.setAttribute('aria-hidden','true');
+}
+function openUI(){
+  uiOpen=true;stack=[];renderList();
+  veil.classList.add('on');panel.classList.add('on');
+  panel.setAttribute('aria-hidden','false');zbtn.setAttribute('aria-expanded','true');
+}
+function closeUI(){
+  uiOpen=false;closeRead();veil.classList.remove('on');panel.classList.remove('on','reading');
+  panel.setAttribute('aria-hidden','true');zbtn.setAttribute('aria-expanded','false');
+  stack=[];
+}
+zbtn.addEventListener('pointerdown',function(e){e.stopPropagation()});
+zbtn.addEventListener('click',function(e){
+  e.stopPropagation();unlock();click(.45);vibe(6);
+  if(uiOpen)closeUI();else openUI();
+});
+panel.addEventListener('pointerdown',function(e){e.stopPropagation()});
+veil.addEventListener('click',function(e){e.stopPropagation();closeUI()});
+$('#lclose').addEventListener('click',function(e){e.stopPropagation();unlock();click(.4);closeUI()});
+$('#rclose').addEventListener('click',function(e){e.stopPropagation();unlock();click(.4);closeUI()});
+$('#back').addEventListener('click',function(e){e.stopPropagation();unlock();click(.4);vibe(5);closeRead()});
+lback.addEventListener('click',function(e){
+  e.stopPropagation();unlock();click(.4);vibe(5);
+  if(stack.length){stack.pop();renderList();listEl.scrollTop=0}
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&uiOpen){
+    if(readOpen)closeRead();
+    else if(stack.length){stack.pop();renderList()}
+    else closeUI();
+  }
+});
+
+mtUI();render();size();
+window.addEventListener('resize',size);
+})();
+</script>
+</body>
+</html>
